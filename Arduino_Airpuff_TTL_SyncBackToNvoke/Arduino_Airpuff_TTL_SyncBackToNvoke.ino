@@ -10,8 +10,9 @@
 
 //This section defines the pins on the Arduino. We specify the intigers (int) TTL1, TTL2, and TTL3.
 //If you expanding this to require more than two channels, uncomment (remove "//") below.
-int TTL1 = 2;       //The input from the nVoke2 comes in here
-int TTL2 = 4;       //The TTL signal to control the airpuff machine will come from here
+int TTL1 = 2;    //Input from nVoke2: If HIGH, Arduino will send varied-duration signal to airpuff machine
+int TTL2 = 4;   //The TTL signal to control the airpuff machine will come from here
+int TTL3 = 7;   //Input from nVoke2: If HIGH, Arduino will send one signal (con_single) to airpuff machine 
 // int TTL3 = 7;       //The IR sensors will get powered from here
 //int TTL4 = 8;     //Not used in this example
 //int TTL5 = 12;    //Can be set as a TTL
@@ -19,7 +20,8 @@ int TTL2 = 4;       //The TTL signal to control the airpuff machine will come fr
 
 //This section defines variables that the Arduino will use to define the state of the sensor
 // int sensorState = LOW, i = 0;
-int nVoke_GPO = LOW;
+int airpuff_varied = LOW;
+int airpuff_single = LOW;
 
 //Now we write the pulse train for the optogenetic stimulation.
 //Draw out the desired waves for the stimulation. The condition (or state) of the Arduino changes any time any of the channels change. See the write up for more information.
@@ -27,11 +29,13 @@ int nVoke_GPO = LOW;
 //Define the number of conditions. Define the length of time (in ms) for each condition. [250 500 750 1000] ms
 //Define the number of times to repeat the pulse train
 
-int con1 = 100;
-int con2 = 250;
-int con3 = 500;
-int con4 = 1000;
+int con1 = 50;
+int con2 = 100;
+int con3 = 250;
+int con4 = 500;
 int conWait = 10000; // from the end of one output to the start of the next output
+
+int con_single = con2; // 
 
 // int  con[] = {100, 250, 500, 1000}; // conditions in ms
 int  con[] = {con1, con2, con3, con4, con1, con2, con3, con4}; // conditions in ms
@@ -64,11 +68,11 @@ void setup()
 {
   pinMode(TTL1, INPUT);
   pinMode(TTL2, OUTPUT);
+  pinMode(TTL3, INPUT);
   // pinMode(TTL3, OUTPUT);
-  digitalWrite(TTL1, LOW);   //This defines the original state of the sensor (when it is open and detecting IR light) as high/on
-  digitalWrite(TTL2,LOW);     //The initial state of the optogenetic stim should be off
-  // digitalWrite(TTL3, LOW);   //This turns on TTL3. We do not change it in the rest of the code so that we can use this to power the IR light and sensor
-  // nVoke_GPO = digitalRead (TTL1);
+  digitalWrite(TTL1, LOW);   //
+  digitalWrite(TTL2, LOW);     //The initial state of the airpuff is off
+  digitalWrite(TTL3, LOW);     //
   Serial.begin(115200); 
 }
 
@@ -78,8 +82,11 @@ void setup()
 
 void loop() 
 {
-  nVoke_GPO = digitalRead(TTL1); // Read TTL1, if HIGH, start the stimulation
-  if (nVoke_GPO == HIGH)
+  airpuff_varied = digitalRead(TTL1); // Read TTL1, if HIGH, start the stimulation
+  airpuff_single = digitalRead(TTL3); // Read TTL1, if HIGH, start the stimulation
+
+  // Apply varied duration airpuff stimulations
+  if (airpuff_varied == HIGH)
   {
     printData();
     Serial.print("num_con = ");
@@ -118,99 +125,12 @@ void loop()
       delay(conWait);
     }
   }
+
+  // Apply one airpuff. Arduino follows the trigger signal from the nVoke2. one trig=one_airpuff 
+  if (airpuff_single == HIGH)
+  {
+    digitalWrite(TTL2, HIGH);
+    delay(con_single);
+    digitalWrite(TTL2, LOW);
+  }
 }
-
-
-
-// void loop()
-// {
-//   nVoke_GPO = digitalRead (TTL1);
-//   if  (nVoke_GPO == HIGH)
-//   {
-//     //1st airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // Serial.print("Variable 1:");
-//     // Serial.print(static_var_on);
-//     // Serial.println("airpuff on");
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con1);
-
-//     //Interval time to allow neurons to recover
-//     digitalWrite(TTL2, LOW);
-//     // Serial.print("Variable 1:");
-//     // Serial.print(static_var_off);
-//     // Serial.println("airpuff off");
-//     // digitalWrite(TTL1, LOW);
-//     delay(conWait);
-
-//     //2nd airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // Serial.println("airpuff on");
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con2);
-
-//     //Interval time to allow neurons to recover
-//     digitalWrite(TTL2, LOW);
-//     // Serial.println("airpuff off");
-//     // digitalWrite(TTL1, LOW);
-//     delay(conWait);
-
-//     //3rd airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con3);
-
-//     //Interval time to allow neurons to recover
-//     digitalWrite(TTL2, LOW);
-//     // digitalWrite(TTL1, LOW);
-//     delay(conWait);
-
-//     //4th airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con4);
-
-//     //Interval time to allow neurons to recover
-//     digitalWrite(TTL2, LOW);
-//     // digitalWrite(TTL1, LOW);
-//     delay(conWait);
-
-//     //5th airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con4);
-
-//     //Interval time to allow neurons to recover
-//     digitalWrite(TTL2, LOW);
-//     // digitalWrite(TTL1, LOW);
-//     delay(conWait);
-
-//     //6th airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con3);
-
-//     //Interval time to allow neurons to recover
-//     digitalWrite(TTL2, LOW);
-//     // digitalWrite(TTL1, LOW);
-//     delay(conWait);
-
-//     //7th airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con2);
-
-//     //Interval time to allow neurons to recover
-//     digitalWrite(TTL2, LOW);
-//     // digitalWrite(TTL1, LOW);
-//     delay(conWait);
-
-//     //8th airpuff stimulation
-//     digitalWrite(TTL2, HIGH);
-//     // digitalWrite(TTL1, HIGH);
-//     delay(con1);
-
-//     //End the stimulation TTL signal
-//     digitalWrite(TTL2, LOW);
-//   }
-// }
