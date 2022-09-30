@@ -34,6 +34,7 @@ int con2 = 100;
 int con3 = 250;
 int con4 = 500;
 int conWait = 10000; // from the end of one output to the start of the next output
+int min_interval = 1000; // Used for airpuff_single. Wait for at least "min_interval" between two output trigger signals
 
 int con_single = con2; // 
 
@@ -127,10 +128,12 @@ void loop()
   }
 
   // Apply one airpuff. Arduino follows the trigger signal from the nVoke2. one trig=one_airpuff 
-  if (airpuff_single == HIGH)
+  else if (airpuff_single == HIGH)
   {
     digitalWrite(TTL2, HIGH);
     delay(con_single);
     digitalWrite(TTL2, LOW);
+    delay(min_interval); // Wait for the duration of "min_interval" before sending output for another stimulation
+    // digitalWrite(TTL3, LOW);
   }
 }
