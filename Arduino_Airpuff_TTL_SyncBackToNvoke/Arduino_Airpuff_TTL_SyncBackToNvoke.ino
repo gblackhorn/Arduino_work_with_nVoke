@@ -43,6 +43,14 @@ void printData()
   Serial.println();
 }
 
+// Swap two elements in an array
+void swapEntries(int a, int b)
+{
+  int temp = con[a];
+  con[a] = con[b];
+  con[b] = temp;
+}
+
 //This section sets up the Arduino to treat the pins as output or input. With this example, Channel 1 (TTL1) is input (from an IR Beam) and Channel 2 is a TTL ouput (to a laser).
 void setup() 
 {
@@ -56,9 +64,10 @@ void setup()
   Serial.begin(115200); 
 }
 
-//This is the code that Arduino send TTL signal to airpuff machine. The airpuff will follow the time and duration of the TTL signal
-//For each output, the duration of will increase from con1 to con4 and then go back to con1
-//Total 8 output with interval (from the end of one output to the start of the next one) of "conWait"
+//This is the code that Arduino send TTL signal to airpuff machine. The airpuff will follow the time
+//and duration of the TTL signal For each output, the duration will increase from con1 to con4
+//and then go back to con1 Total 8 output with interval (from the end of one output to the start of
+//the next one) of "conWait"
 
 void loop() 
 {
