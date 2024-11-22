@@ -1,10 +1,10 @@
 /*
-   Updated code to handle specific airpuff stimulation timings
+   Updated code to stop stimulation if TTL1 becomes LOW
    Stimulations occur at the absolute times: 35s, 45s, 60.3s, 70.4s, 78s, 88s, 100.7s, 110.8s
 */
 
 // Define the pins
-int TTL1 = 2;    // Input from nVoke2: If HIGH, Arduino will start the timing protocol
+int TTL1 = 2;    // Input from nVoke2: If HIGH, Arduino will start/continue the protocol
 int TTL2 = 4;    // Output TTL signal to control the airpuff machine
 
 // Define stimulation timings (in milliseconds)
@@ -21,15 +21,14 @@ void setup()
   pinMode(TTL1, INPUT);
   pinMode(TTL2, OUTPUT);
   digitalWrite(TTL2, LOW);    // Initial state of the airpuff machine is OFF
-  // Serial.begin(115200);
+  Serial.begin(115200);
 }
 
 void loop() 
 {
-  // int trigger_signal = HIGH;  // Automatically start the protocol for testing
-  int trigger_signal = digitalRead(TTL1); // Read TTL1 to start the stimulation protocol
+  int trigger_signal = digitalRead(TTL1); // Read TTL1
 
-  // Start the protocol when TTL1 is HIGH
+  // Start the protocol when TTL1 is HIGH and not already running
   if (trigger_signal == HIGH && !protocol_running) 
   {
     protocol_running = true;
@@ -38,10 +37,20 @@ void loop()
     Serial.println("Stimulation protocol started!");
   }
 
+  // If the protocol is running
   if (protocol_running) 
   {
+    // Stop the protocol immediately if TTL1 becomes LOW
+    if (trigger_signal == LOW) 
+    {
+      Serial.println("TTL1 went LOW. Stopping the protocol.");
+      protocol_running = false;       // Stop the protocol
+      digitalWrite(TTL2, LOW);        // Ensure the output is turned OFF
+      return;                         // Exit the loop iteration
+    }
+
     unsigned long current_time = millis(); // Get the current elapsed time
-    
+
     // Check if the current stimulation index is within bounds
     if (stim_index < num_stim) 
     {
@@ -56,18 +65,14 @@ void loop()
         Serial.println(" seconds");
 
         digitalWrite(TTL2, HIGH);
-        // Serial.println("Simulating airpuff ON...");
         delay(100); // Simulate airpuff duration (100 ms)
         digitalWrite(TTL2, LOW);
-        // Serial.println("Simulating airpuff OFF...");
-
 
         stim_index++; // Move to the next stimulation
       }
     } 
     else 
     {
-      // Protocol complete
       Serial.println("Stimulation protocol complete!");
       protocol_running = false; // Stop the protocol
     }
