@@ -24,7 +24,7 @@ int con2 = 100;
 int con3 = 250;
 int con4 = 500;
 int conWait = 10000; // from the end of one output to the start of the next output
-int min_interval = 1000; // Used for airpuff_single. Wait for at least "min_interval" between two output trigger signals
+int min_interval = 999; // Used for airpuff_single. Wait for at least "min_interval" between two output trigger signals
 
 int con_single = con2; // 
 
@@ -51,12 +51,12 @@ void swapEntries(int a, int b)
   con[b] = temp;
 }
 
-//This section sets up the Arduino to treat the pins as output or input. With this example, Channel 1 (TTL1) is input (from an IR Beam) and Channel 2 is a TTL ouput (to a laser).
+//This section sets up the Arduino to treat the pins as output or input. 
 void setup() 
 {
-  pinMode(TTL1, INPUT);
+  // pinMode(TTL1, INPUT);
   pinMode(TTL2, OUTPUT);
-  pinMode(TTL3, INPUT);
+  // pinMode(TTL3, INPUT);
   // pinMode(TTL3, OUTPUT);
   digitalWrite(TTL1, LOW);   //
   digitalWrite(TTL2, LOW);     //The initial state of the airpuff is off
